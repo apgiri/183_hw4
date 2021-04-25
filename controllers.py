@@ -30,11 +30,52 @@ from yatl.helpers import A
 from .common import db, session, T, cache, auth, logger, authenticated, unauthenticated, flash
 from py4web.utils.url_signer import URLSigner
 from .models import get_user_email
+from py4web.utils.form import Form, FormStyleBulma
 
 url_signer = URLSigner(session)
 
+
 @action('index')
-@action.uses(db, auth, 'index.html')
+@action.uses(db, auth.user, 'index.html')
 def index():
-    print("User:", get_user_email())
-    return dict()
+    rows = db(db.contact.user_email == get_user_email()).select()
+    return dict(rows=rows, url_signer=url_signer)
+
+
+@action('add', method=["GET", "POST"])
+@action.uses(db, session, auth.user, 'add.html')
+def add():
+    form = Form(db.contact, csrf_session=session, formstyle=FormStyleBulma)
+    if form.accepted:
+        redirect(URL('index'))
+    return dict(form=form)
+
+
+@action('edit/<contact_id:int>', method=['GET', 'POST'])
+@action.uses(db, session, auth.user, 'edit.html')
+def edit(contact_id=None):
+    if contact_id is None:
+        redirect(URL('index'))
+
+    p = db.contact[contact_id]
+    if p is None:
+        redirect(URL('index'))
+
+    form = Form(db.contact, record=p, csrf_session=session, deletable=False, formstyle=FormStyleBulma)
+    if form.accepted:
+        redirect(URL('index'))
+    return dict(form=form)
+
+
+@action('delete/<contact_id:int>')
+@action.uses(db, session, auth.user)
+def delete(contact_id=None):
+    assert contact_id is not None
+    contact = db.contact[contact_id]
+    if contact is None:
+        redirect(URL('index'))
+    db(db.contact.id == contact_id).delete()
+    redirect(URL('index'))
+
+
+
