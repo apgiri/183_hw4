@@ -40,6 +40,7 @@ url_signer = URLSigner(session)
 @action.uses(db, auth.user, 'index.html')
 def index():
     rows = db(db.contact.user_email == get_user_email()).select()
+    # connection test
     return dict(rows=rows, url_signer=url_signer)
 
 
