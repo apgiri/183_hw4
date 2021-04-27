@@ -1,0 +1,35 @@
+[[extend 'layout.html']]
+
+<div class="section">
+   <h1 class = "title">Phone Numbers for [[=name]]</h1>
+   <table class = "table is-fullwidth is-striped is-hoverable">
+      <tr>
+         <th>Phone</th>
+         <th>Kind</th>
+         <th></th>
+      </tr>
+      [[for row in rows:]]
+      <tr>
+         <td>[[=row.phone.number]]</td>
+         <td>[[=row.phone.phone_type]]</td>
+         <td>
+            <a class = "button is-warning" href = "[[=URL('edit_phone', row.contact.id, row.phone.id, signer=url_signer)]]">
+               <span class = "icon"><i class = "fa fa-fw fa-edit"></i></span>
+            </a>
+            <a class = "button is-danger" href = "[[=URL('delete_phone', row.contact.id, row.phone.id, signer=url_signer)]]">
+               <span class = "icon"><i class = "fa fa-fw fa-trash"></i></span>
+            </a>
+         </td>
+      </tr>
+      [[pass]]
+
+   </table>
+   <a class = "button is-info" href="[[=URL('index', signer=url_signer)]]">
+      <span class = "icon"><i class = "fa fa-arrow-left"></i></span>
+      <span>Back</span>
+   </a>
+   <a class = "button is-success" href="[[=URL('add_phone', owner_id, signer=url_signer)]]">
+      <span class = "icon"><i class = "fa fa-plus"></i></span>
+      <span>Add Phone Number</span>
+   </a>
+</div>
