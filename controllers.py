@@ -39,8 +39,24 @@ url_signer = URLSigner(session)
 @action('index')
 @action.uses(db, auth.user, 'index.html')
 def index():
-    rows = db(db.contact.user_email == get_user_email()).select()
-    # connection test
+    # rows = db(db.contact.user_email == get_user_email()).select()
+
+    rows = db(db.contact.user_email == get_user_email()).select().as_list()
+
+    # for each contact, add a new field that specifies phone number(s) their type
+    for row in rows:
+        list_numbers = []
+        # get the numbers and types a particular contact
+        num_and_type = db(
+            db.phone.contact_id == row["id"]
+        ).select()
+        # make combine the numbers into a string
+        for elem in num_and_type:
+            s = f"{elem.number} ({elem.phone_type})"
+            list_numbers.append(s)
+
+        row["nums_and_types"] = (', '.join(list_numbers))
+
     return dict(rows=rows, url_signer=url_signer)
 
 

@@ -12,28 +12,28 @@
       </tr>
       [[for row in rows:]]
       <tr>
-         <td>[[=row.first_name]]</td>
-         <td>[[=row.last_name]]</td>
+         <td>[[=row["first_name"] ]]</td>
+         <td>[[=row["last_name"] ]]</td>
 
          <td>
-            <a class = "button is-info" href = "[[=URL('edit', row.id, signer=url_signer)]]">
+            <a class = "button is-info" href = "[[=URL('edit', row['id'], signer=url_signer)]]">
                <span class = "icon"><i class = "fa fa-fw fa-pencil"></i></span>
 <!--               <span>Edit</span>-->
             </a>
 <!--         </td>-->
 
 <!--         <td>-->
-            <a class = "button is-danger" href = "[[=URL('delete', row.id, signer=url_signer)]]">
+            <a class = "button is-danger" href = "[[=URL('delete', row['id'], signer=url_signer)]]">
                <span class = "icon"><i class = "fa fa-fw fa-trash"></i></span>
 <!--               <span>Edit</span>-->
             </a>
          </td>
          <td>
-<!--            Phone data goes here -->
+             [[=row["nums_and_types"] ]]
          </td>
          <td>
 <!--            /add_phone/<contact_id>-->
-            <a class = "button is-warning" href = "[[=URL('edit_phones', row.id, signer=url_signer)]]">
+            <a class = "button is-warning" href = "[[=URL('edit_phones', row['id'], signer=url_signer)]]">
                <span class = "icon"><i class = "fa fa-fw fa-edit"></i></span>
                <!--               <span>Edit</span>-->
             </a>
