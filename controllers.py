@@ -39,8 +39,6 @@ url_signer = URLSigner(session)
 @action('index')
 @action.uses(db, auth.user, 'index.html')
 def index():
-    # rows = db(db.contact.user_email == get_user_email()).select()
-
     rows = db(db.contact.user_email == get_user_email()).select().as_list()
 
     # for each contact, add a new field that specifies phone number(s) their type
@@ -50,7 +48,7 @@ def index():
         num_and_type = db(
             db.phone.contact_id == row["id"]
         ).select()
-        # make combine the numbers into a string
+        # combine the numbers into a string
         for elem in num_and_type:
             s = f"{elem.number} ({elem.phone_type})"
             list_numbers.append(s)
@@ -72,7 +70,7 @@ def add():
 
 # edit a contact
 @action('edit/<contact_id:int>', method=['GET', 'POST'])
-@action.uses(db, session, auth.user, 'edit.html')
+@action.uses(db, session, auth.user, url_signer.verify(), 'edit.html')
 def edit(contact_id=None):
     if contact_id is None:
         redirect(URL('index'))
@@ -89,7 +87,7 @@ def edit(contact_id=None):
 
 # delete a contact
 @action('delete/<contact_id:int>')
-@action.uses(db, session, auth.user)
+@action.uses(db, session, url_signer.verify(), auth.user)
 def delete(contact_id=None):
     assert contact_id is not None
     contact = db.contact[contact_id]
@@ -112,6 +110,7 @@ def add_phone(contact_id=None):
         (db.phone.contact_id == contact_id) &
         (db.contact.id == db.phone.contact_id)
     ).select()
+
     return dict(rows=rows, url_signer=url_signer, name=name, owner_id=contact_id)
 
 
@@ -121,7 +120,7 @@ def add_phone(contact_id=None):
 def add_phone(contact_id):
     assert contact_id is not None
     # contact_id is the id of the contact for which we are inserting an additional number
-    contact_inf = db.contact[contact_id]
+
     form = Form([Field('Phone', 'string'), Field('Kind', 'string')], csrf_session=session, formstyle=FormStyleBulma)
     form.param.sidecar.append(SPAN(" ", A("Back", _class="button", _href=URL('edit_phones', contact_id))))
 
@@ -156,6 +155,10 @@ def delete_phone(contact_id=None, phone_id=None):
     # row.id is the id of the phone number being targeted
     if row.id is None:
         redirect(URL('edit_phones', contact_id))
+
+    contact_inf = db(db.contact.id == contact_id).select().first()
+    if contact_inf.user_email != get_user_email():
+        abort(403)
     db(
         db.phone.id == row.id
     ).delete()
@@ -175,6 +178,10 @@ def edit_phone(contact_id=None, phone_id=None):
     ).select().first()
     if row is None:
         redirect(URL('edit_phones', contact_id))
+
+    contact_inf = db(db.contact.id == contact_id).select().first()
+    if contact_inf.user_email != get_user_email():
+        abort(403)
 
     form = Form([Field('Phone', 'string'), Field('Kind', 'string')],
                 record=dict(Phone=row.number, Kind=row.phone_type), deletable=False, csrf_session=session, formstyle=FormStyleBulma)
